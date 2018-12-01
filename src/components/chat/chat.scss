@@ -1,0 +1,36 @@
+@import "~css/constants.scss";
+
+.chat-wrapper {
+    width: 100%;
+    height: $chat-height;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid $black;
+
+    .chat-history-wrapper {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 2;
+        overflow-y: scroll;
+        padding: 0 0.5rem;
+    }
+
+    .message {
+        display: flex;
+        min-height: 1.5rem;
+        &:nth-child(2n) {
+            background-color: rgba($color: #000000, $alpha: 0.05);
+        }
+    }
+
+    .chat-form {
+        display: grid;
+        grid-template-columns: 85% 1fr;
+        height: 2rem;
+        min-height: 2rem;
+    }
+
+    input {
+        padding: 0 0.5rem;
+    }
+}

@@ -1,0 +1,39 @@
+@import "~css/constants.scss";
+
+html {
+    background: $white;
+    box-sizing: border-box;
+    color: $text-primary;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1em;
+    font-weight: $standard-font-weight;
+    line-height: 1.63;
+    min-height: 100vh;
+    height: 100vh;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+}
+
+#app {
+    height: 100%;
+}
+
+.components-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+

@@ -1,0 +1,23 @@
+// ERRORS
+export const SET_ERROR = 'SET_ERROR';
+
+// LOADING
+export const SET_LOADING = 'SET_LOADING';
+
+// LOGIN
+export const LOGOUT = 'LOGOUT';
+
+// MODAL
+export const OPEN_MODAL = 'OPEN_MODAL';
+export const CLOSE_MODAL = 'CLOSE_MODAL';
+
+// INPUTS
+export const UPDATE_INPUT = 'UPDATE_INPUT';
+export const CLEAR_INPUTS = 'CLEAR_INPUTS';
+
+// SETTINGS
+export const SET_SETTINGS = 'SET_SETTINGS';
+
+// CHAT HISTORY
+export const UPDATE_CHAT_HISTORY = 'UPDATE_CHAT_HISTORY';
+export const CLEAR_CHAT_HISTORY = 'CLEAR_CHAT_HISTORY';
