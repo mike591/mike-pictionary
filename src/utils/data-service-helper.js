@@ -25,6 +25,7 @@ export default class DataServiceHelper {
 
     setAnswer(roomName, answer) {
         const service = this.createDataService(`offerAnswer-${roomName}`);
-        return service.save('answer', answer);
+        return service.saveAs('answer', JSON.stringify(answer));
+        // return service.save('answer', { answers: answer = [] }); // TODO: get it working for one other player
     }
 }

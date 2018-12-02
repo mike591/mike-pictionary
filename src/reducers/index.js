@@ -4,6 +4,7 @@ import { modals } from 'reducers/modal-reducer';
 import { settings } from 'reducers/settings-reducer';
 import { inputs } from 'reducers/input-reducer';
 import { chatHistory } from 'reducers/chat-history-reducer';
+import { webrtc } from 'reducers/webrtc-reducer';
 
 const reducerList = {
     errors,
@@ -12,6 +13,7 @@ const reducerList = {
     settings,
     inputs,
     chatHistory,
+    webrtc,
 };
 
 export default reducerList;

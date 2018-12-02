@@ -1,6 +1,8 @@
 import { endpoints } from 'utils';
 import {
     updateChatHistory,
+    setOffer,
+    setAnswers,
 } from 'actions';
 
 /* eslint-enable */
@@ -20,7 +22,10 @@ const handleDataSubscriptionUpdate = (dispatch, data, meta) => {
     const type = data.id;
     switch (type) {
         case 'offer':
-            console.log(data);
+            dispatch(setOffer(data));
+            break;
+        case 'answer':
+            dispatch(setAnswers(data)); // TODO: get it working with one other player for now
             break;
         default:
             console.error('Not a valid type', data);

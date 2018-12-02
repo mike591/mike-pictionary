@@ -1,12 +1,14 @@
 import { connect } from 'react-redux';
 import { Game } from 'components';
-import { openModal, closeModal, setSettings, updateInput } from 'actions';
+import { openModal, closeModal, setSettings, updateInput, setOffer, setAnswers, setCandidates } from 'actions';
 import { channelHelper, DataServiceHelper } from 'utils';
 
 const mapStateToProps = (state) => {
     return ({
         roomName: state.settings.roomName,
         inputs: state.inputs,
+        isDrawing: state.settings.isDrawing,
+        webrtc: state.webrtc,
     });
 };
 
@@ -21,20 +23,21 @@ const mapDispatchToProps = (dispatch) => {
             dispatch(channelHelper.subscribeToGroupChannel(roomName));
             dispatch(channelHelper.subscribeToOfferAnswer(roomName));
             dsHelper.getOfferAnswer(roomName).then((res) => {
-                const offer = [];
-                let answers;
+                let offer = {};
+                let answers = [];
                 res.forEach((item) => {
-                    if (item.id === 'offer') {
-                        offer.push(res.offer);
-                    } else if (item.id === 'answer') {
-                        answers = res.answers;
+                    if (item.id === 'offer' && item) {
+                        offer = item;
+                    } else if (item.id === 'answer' && item) {
+                        answers = item.answers;
                     }
                 });
-                console.log(offer);
-                console.log(answers);
+                dispatch(setOffer(offer));
+                dispatch(setAnswers(answers));
             });
         },
         setOffer: (roomName, offer) => dsHelper.setOffer(roomName, offer),
+        setAnswer: (roomName, answer) => dsHelper.setAnswer(roomName, answer),
     });
 };
 

@@ -14,6 +14,7 @@ class Game extends React.Component {
         this.pos = { x: 0, y: 0 };
         this.peerConnection = null;
         this.state = {
+            answerSent: false,
             color: '#000000',
         };
     }
@@ -25,6 +26,21 @@ class Game extends React.Component {
         }
         this.setupCanvas();
         this.setupWebrtc();
+    }
+
+    componentDidUpdate() {
+        const { isDrawing, webrtc, setAnswer, roomName } = this.props;
+        const { answerSent } = this.state;
+        if (roomName && !isDrawing && Object.keys(webrtc.offer).length && !answerSent) {
+            this.peerConnection.setRemoteDescription(webrtc.offer).then(() => {
+                this.peerConnection.createAnswer().then((answer) => {
+                    this.peerConnection.setLocalDescription(answer);
+                    this.setState({ answerSent: true }, () => {
+                        setAnswer(roomName, answer);
+                    });
+                });
+            });
+        }
     }
 
     setupWebrtc = () => {
@@ -53,6 +69,7 @@ class Game extends React.Component {
 
     handleRemoteStreamAdded = (event) => {
         this.remoteStream = event.stream;
+        console.warn('remoteStream', this.remoteStream);
         // channelHelper.sendWebRTCMessage({
         //     type: 'associateRemoteStream',
         //     remoteStreamReady: true,
@@ -142,6 +159,7 @@ class Game extends React.Component {
             const settings = {
                 roomName: inputs.roomName,
                 userName: inputs.userName,
+                isDrawing: inputs.userName.indexOf('draw') >= 0, // TODO: remove draw assignment
             };
 
             setSettings(settings);
@@ -152,19 +170,26 @@ class Game extends React.Component {
 
     createTestButton = () => {
         const { setOffer, inputs } = this.props;
-        return null;
+        // return null;
 
-        // return (
-        //     <button
-        //         onClick={() => {
-        //             this.peerConnection.createOffer().then((res) => {
-        //                 setOffer(inputs.roomName, res);
-        //             });
-        //         }}
-        //     >
-        //         setOffer
-        //     </button>
-        // );
+        return (
+            <button
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    bottom: 0,
+                }}
+                onClick={() => {
+                    this.peerConnection.createOffer().then((offer) => {
+                        this.peerConnection.addStream(this.canvasStream);
+                        this.peerConnection.setLocalDescription(offer);
+                        setOffer(inputs.roomName, offer);
+                    });
+                }}
+            >
+                Send Offer
+            </button>
+        );
     }
 
     render() {
