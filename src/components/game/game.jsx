@@ -10,10 +10,13 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
         this.canvasRef = React.createRef();
+        this.videoRef = React.createRef();
         this.canvasStream = null;
         this.pos = { x: 0, y: 0 };
         this.peerConnection = null;
+        this.iceCandidates = [];
         this.state = {
+            answerReceived: false,
             answerSent: false,
             color: '#000000',
         };
@@ -28,27 +31,39 @@ class Game extends React.Component {
         this.setupWebrtc();
     }
 
+    /* eslint-disable complexity */
     componentDidUpdate() {
         const { isDrawing, webrtc, setAnswer, roomName } = this.props;
-        const { answerSent } = this.state;
-        if (roomName && !isDrawing && Object.keys(webrtc.offer).length && !answerSent) {
-            this.peerConnection.setRemoteDescription(webrtc.offer).then(() => {
-                this.peerConnection.createAnswer().then((answer) => {
-                    this.peerConnection.setLocalDescription(answer);
-                    this.setState({ answerSent: true }, () => {
+        const { answerSent, answerReceived } = this.state;
+        if (roomName && !isDrawing && webrtc.offer && Object.keys(webrtc.offer).length && !answerSent) {
+            this.setState({ answerSent: true }, () => {
+                this.peerConnection.setRemoteDescription(webrtc.offer).then(() => {
+                    this.peerConnection.createAnswer().then((answer) => {
+                        this.peerConnection.setLocalDescription(answer);
                         setAnswer(roomName, answer);
                     });
                 });
             });
+        } else if (isDrawing && roomName && webrtc.answers && Object.keys(webrtc.answers).length && !answerReceived) {
+            this.setState({ answerReceived: true }, () => {
+                this.peerConnection.setRemoteDescription(webrtc.answers);
+            });
         }
+
+        webrtc.candidates.forEach((candidate) => {
+            if (this.peerConnection && this.peerConnection.remoteDescription && this.peerConnection.remoteDescription.type && this.iceCandidates.indexOf(candidate) === -1) {
+                this.iceCandidates.push(candidate);
+                this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
     }
+    /* eslint-enable */
 
     setupWebrtc = () => {
         const PeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
         const pc = new PeerConnection();
         pc.onicecandidate = this.handleIceCandidate;
         pc.onaddstream = this.handleRemoteStreamAdded;
-        pc.oniceconnectionstatechange = this.handleIceConnectionStateChange;
         this.peerConnection = pc;
 
         const thirtyFPS = 30;
@@ -57,57 +72,21 @@ class Game extends React.Component {
     }
 
     handleIceCandidate = (event) => {
+        const { sendGroupChannelMessage, roomName } = this.props;
         if (event.candidate) {
-            // channelHelper.sendWebRTCMessage({
-            //     type: 'candidate',
-            //     label: event.candidate.sdpMLineIndex,
-            //     id: event.candidate.sdpMid,
-            //     candidate: event.candidate,
-            // }, this.pairRoom);
+            sendGroupChannelMessage({
+                type: 'candidate',
+                label: event.candidate.sdpMLineIndex,
+                id: event.candidate.sdpMid,
+                candidate: event.candidate,
+            }, roomName);
         }
     }
 
     handleRemoteStreamAdded = (event) => {
         this.remoteStream = event.stream;
-        console.warn('remoteStream', this.remoteStream);
-        // channelHelper.sendWebRTCMessage({
-        //     type: 'associateRemoteStream',
-        //     remoteStreamReady: true,
-        // }, this.pairRoom);
-
-        // let streamToRecord = null;
-        // const audioContext = new AudioContext();
-        // const sources = this.localStream.getAudioTracks().concat(this.remoteStream.getAudioTracks()).map((track) => {
-        //     return audioContext.createMediaStreamSource(new MediaStream([track]));
-        // });
-        // const destination = audioContext.createMediaStreamDestination();
-        // sources.forEach((source) => source.connect(destination));
-        // if (this.mediaType === AUDIO) {
-        //     streamToRecord = destination.stream;
-        // } else {
-        //     streamToRecord = this.canvasStream;
-        //     destination.stream.getAudioTracks().forEach((track) => {
-        //         streamToRecord.addTrack(track);
-        //     });
-        // }
-
-        // this.mediaRecorder = new MediaRecorder(streamToRecord, this.generateMediaRecordFormat());
-        // this.mediaRecorder.start();
-        // this.mediaRecorder.ondataavailable = (e) => {
-            // this.handleAddChunks(e);
-        // };
-        // this.mediaRecorder.onstop = this.handleRecorderStop;
+        this.videoRef.current.srcObject = this.remoteStream;
     }
-
-    handleIceConnectionStateChange = (event) => {
-        if (this.peerConnection && this.peerConnection.iceConnectionState) {
-            // channelHelper.sendWebRTCMessage({
-            //     type: 'iceConnectionState',
-            //     iceConnectionState: this.peerConnection.iceConnectionState,
-            // }, this.pairRoom);
-        }
-    }
-
 
     setPosition = (e) => {
         const bounds = this.canvasRef.current.getBoundingClientRect();
@@ -193,7 +172,7 @@ class Game extends React.Component {
     }
 
     render() {
-        const { inputs, updateInput, setOffer } = this.props;
+        const { inputs, updateInput, isDrawing } = this.props;
 
         return (
             <div className="game-wrapper">
@@ -223,7 +202,8 @@ class Game extends React.Component {
                 <TwitterPicker
                     onChangeComplete={(color) => this.setState({ color: color.hex })}
                 />
-                <canvas className="canvas" ref={this.canvasRef} />
+                <canvas className={`canvas ${isDrawing ? '' : 'hidden'}`} ref={this.canvasRef} />
+                <video className={`video ${isDrawing ? 'hidden' : ''}`} ref={this.videoRef} autoPlay/>
                 {this.createTestButton()}
             </div>
         );

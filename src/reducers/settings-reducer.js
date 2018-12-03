@@ -5,6 +5,7 @@ import {
 
 const initialState = {
     roomName: null,
+    isDrawing: true,
 };
 
 export function settings(state = initialState, action) {

@@ -3,6 +3,7 @@ import {
     updateChatHistory,
     setOffer,
     setAnswers,
+    setCandidates,
 } from 'actions';
 
 /* eslint-enable */
@@ -12,6 +13,9 @@ const handleGroupChannel = (dispatch, data, meta) => {
     switch (type) {
         case 'chat':
             dispatch(updateChatHistory(data.data));
+            break;
+        case 'candidate':
+            dispatch(setCandidates(data.data.candidate));
             break;
         default:
             console.error('Not a valid type', data);
@@ -77,7 +81,7 @@ class ChannelHelper {
         if (this.subscriptions.groupChannel) {
             manager.getGroupChannel().publish(`${roomName}`, message);
         } else {
-            console.warn('Not currently subscribed to groupChannel');
+            console.error('Not currently subscribed to groupChannel');
         }
     }
 

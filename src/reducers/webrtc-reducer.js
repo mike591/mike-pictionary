@@ -20,7 +20,7 @@ export function webrtc(state = initialState, action) {
             return { ...state, answers: action.answers };
             // return { ...state, answers: [...state.answers, ...action.answers] }; // TODO: get it working for one other player first
         case SET_CANDIDATES:
-            return { ...state, candidates: [...state.candidates, ...action.candidates] };
+            return { ...state, candidates: [...state.candidates, action.candidates] };
         case LOGOUT:
             return initialState;
         default:

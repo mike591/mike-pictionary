@@ -19,6 +19,9 @@ const mapDispatchToProps = (dispatch) => {
         closeModal: (modalName) => dispatch(closeModal(modalName)),
         updateInput: (key, val) => dispatch(updateInput(key, val)),
         setSettings: (settings) => dispatch(setSettings(settings)),
+        sendGroupChannelMessage: (message, roomName) => {
+            channelHelper.sendGroupChannelMessage(message, roomName);
+        },
         subscribeToRoom: (roomName) => {
             dispatch(channelHelper.subscribeToGroupChannel(roomName));
             dispatch(channelHelper.subscribeToOfferAnswer(roomName));
